@@ -58,6 +58,9 @@ add_executable(turtlebot3_drive src/turtlebot3_drive.cpp)
 add_dependencies(turtlebot3_drive ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(turtlebot3_drive ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
+add_executable(groundtruth_node src/groundtruth_node.cpp)
+target_link_libraries(groundtruth_node  ${catkin_LIBRARIES})
+
 ################################################################################
 # Install
 ################################################################################

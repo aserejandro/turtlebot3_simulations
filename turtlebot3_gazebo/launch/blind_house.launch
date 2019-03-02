@@ -1,5 +1,6 @@
 <launch>
-  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <!--<arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>-->
+  <arg name="model" default="blind" doc="model type [burger, waffle, waffle_pi]"/>
   <arg name="x_pos" default="-3.0"/>
   <arg name="y_pos" default="1.0"/>
   <arg name="z_pos" default="0.0"/>
@@ -20,10 +21,7 @@
 
   <!-- Load the joint controllers -->
   <rosparam file="$(find turtlebot3_description)/config/config.yaml" command="load" />
-
-  <node name="joint_state_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/camera_joint_model" args="joint_state_controller" />
-  <node name="kinect_joint_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/camera_joint_model" args="kinect_joint_controller" />
-
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/camera_joint_model" args="joint_state_controller kinect_joint_controller" />
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />
@@ -31,7 +29,39 @@
   </node>
 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="use_gui" value="true"/>
+    <param name="use_gui" value="false"/>
+  </node>
+
+  <node pkg="turtlebot3_gazebo" type="groundtruth_node" name="groundtruth_node">
+    <param name="Topic_name" value="/ground_truth/state"/>
+    <param name="childFrame_id" value="base_footprint"/>
+    <param name="parentFrame_id" value="world"/>
+  </node>
+
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+    <remap from="cloud_in" to="/camera/depth_registered/points"/>
+    <remap from="scan" to="/camera/scan"/>
+    <rosparam>
+      target_frame: base_footprint #Leave disabled to output scan in pointcloud frame
+      transform_tolerance: 0.01
+      min_height: 0.2
+      max_height: 1.5
+
+      angle_min: -1.5708 # -M_PI/2
+      angle_max: 1.5708 # M_PI/2
+      angle_increment: 0.0087 # M_PI/360.0
+      scan_time: 0.3333
+      range_min: 0.45
+      range_max: 5.0
+      use_inf: true
+      inf_epsilon: 1.0
+
+      # Concurrency level, affects number of pointclouds queued for processing, thread number governed by nodelet manager
+      # 0 : Detect number of cores
+      # 1 : Single threaded
+      # 2->inf : Parallelism level
+      concurrency_level: 1
+    </rosparam>
   </node>
 
 </launch>
