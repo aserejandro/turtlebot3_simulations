@@ -60,8 +60,14 @@
       # 0 : Detect number of cores
       # 1 : Single threaded
       # 2->inf : Parallelism level
-      concurrency_level: 1
+      concurrency_level: 0
     </rosparam>
   </node>
+
+  <!--  smooths inputs from /raw_cmd_vel to /cmd_vel -->
+  <node pkg="nodelet" type="nodelet" name="velocity_smoother_nodelet_manager" args="manager"/>
+  <include file="$(find turtlebot3_gazebo)/launch/includes/velocity_smoother.launch">
+    <arg name="nodelet_manager_name" value="velocity_smoother_nodelet_manager"/>
+  </include>
 
 </launch>
